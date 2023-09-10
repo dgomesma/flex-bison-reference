@@ -146,7 +146,57 @@ Rules without a prefixed state are automatically associated with the **INITIAL**
 
 # Functions and Data Structures
 ## Running the Scanner
-TODO
+The function `yylex()` is the "heart" of the scanner. Calling this function will effectively commence scanning until end of input (EOF) or until a pattern is matched and the scanner runs some code that returns something.
+
+The signature of this function will depend on some factors. If you're writing a stand-alone scanner (not linking with Bison), then the function signature will likely be `int yylex(void)`. If you're integrating with Bison, then it might be something like `int yylex(YYSTYPE* yylval)`, where, in both cases, the `int` is usually some number encoding the token which is usually defined in an enum. The `YYSTYPE` is a data structured used by Bison and will not be discussed in this reference. When EOF is reached, `yylex()` will return 0.
+
+In that manner, a code that uses `yylex()` might be something along those lines:
+```C
+%{
+// Headers, includes and definitions
+
+// We gotta either define a token for EOF with value 0, or start assigning values to enum starting from 1 as done below.
+typedef enum {T_AND = 1, T_OR, T_NOT, T_VAR} t_token;
+
+// ...
+%}
+  /* REGEX DEFINITIONS */
+letter        [a-zA-Z]
+digit         [0-9]
+identifier    {letter}({letter}|{digit})*
+%%
+	/* Code on REGEX matching */
+\&             { return T_AND; } 
+\|             { return T_OR; }
+\~             { return T_NOT; }
+{identifier}   { yylval.varname = new std::string(yytext); return T_VAR; }
+[ \t\n]         ;
+%%
+
+int main(int argc, char* argv[]) {
+	// Stuff
+	while ((token = yylex()) {
+		switch(token) {
+			case T_AND:
+				// Something...
+				break;
+			case T_OR:
+				// Something...
+				break;
+			case T_NOT:
+				// Something
+				break;
+			case T_VAR:
+				// Something
+				break;	
+		}	
+		// More stuff...
+	}
+	return 0;
+}
+```
+
+
 ## Input/Output Control
 `FILE* yyin` and `FILE* yyout` are two global variables defined in the Flex scanner file which point to the input and output stream for the lexer. They allow you to control to which file the scanner will read from, and to which file it will output, aside from allowing you to do other operations you can do over a `FILE*`.
 
