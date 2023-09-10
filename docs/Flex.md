@@ -54,6 +54,7 @@ binary_op -> expression binary_operator expression
 Where `expression` is a rule defining, well, expressions that can be evaluated, and `binary_operator` is also a rule defined by a `binary_op` token, such as "+", "-", "\*", "%", "&&", "||", "<<", ">>", "&", "|". Note that rules can be comprised of other rules or of tokens, and **order matters**. And a _grammar_ is a set of _rules_.
 
 In that way, in the big picture of a compiler, `flex` will allow for finding tokens, which may be used by _parsers_ (such as `bison`) for matching rules, and in `bison`, whenever a rule gets matched, code gets generated somehow.
+# Flex File
 ## File Structure
 The structure of a Lexer file is generally as follows:
 ```c
@@ -92,6 +93,47 @@ int main() {
 	return 0;
 }
 ```
+
+As you can see, a Flex file is divided into three sections by the `%%` as follows:
+
+```
+definitions
+%%
+rules
+%%
+code
+```
+
+## Definitions
+This is where you want to include some C code in between the `%{` and the `%}`. Some code that might be useful there include headers, `include` directives, macro definitions, global variables, and so forth. In the `rules` section, some code might be run, and we can use anything that has been defined in that section of the code.
+
+Outside the `%{` and `%}` enclosed C code, we can include pattern definitions to make our code more readable. For instance, rather than having a rule as follows:
+```C
+[a-zA-Z]                   { return T_LETTER; }
+```
+
+We can have the following:
+```c
+// ...
+letter       [a-zA-Z]
+%%
+
+letter                     { return T_LETTER; }
+```
+
+## Rules
+Here we define the rules. Rules are a relation between patterns and code, where, when scanning, if the pattern is matched, the code is run. The code run may or may not return. If it does not return, the code will get executed and then the scanner will continue looking for matches. If it returns, it must return an `int`, and scanning stops until `yylex` is called again.
+
+Here is one examples of some rules:
+```c
+[0-9]                   { printf("Found a digit!\n"); }
+[a-zA-Z]                { return T_LETTER; }
+```
+
+On the left, we have a regex pattern the scanner will look for. Upon finding a match, the code on the right gets run. In the example above, if a digit is found, it will print "Found a digit!" line. If it finds a character, it will stop scanning and return a `T_LETTER` token, where `T_LETTER` is actually an enum encoding some integer value.
+
+## User Code
+Here you can have regular C code. You may or may not have a `main` here. You may or may not call `yylex` to do scanning here. You may or may not have any code at all here. But this section allows you to have a single Flex file with all the code that you need for writing a simple program, although, for larger programs I believe it is best to use that section only for lexer-related function definitions.
 ## Patterns
 As probably previously stated, flex matches through regex. Regex patterns can either be defined in a way similar to how macros get defined, like above, `letter [a-zA-Z]`, and later be used to make other definitions (e.g. `alphanumeric ({digit} | {letter} )+` or it can be used in rules:
 ```C 
@@ -195,8 +237,6 @@ int main(int argc, char* argv[]) {
 	return 0;
 }
 ```
-
-
 ## Input/Output Control
 `FILE* yyin` and `FILE* yyout` are two global variables defined in the Flex scanner file which point to the input and output stream for the lexer. They allow you to control to which file the scanner will read from, and to which file it will output, aside from allowing you to do other operations you can do over a `FILE*`.
 
