@@ -216,7 +216,99 @@ fclose(yyout);
 
 You can also use `void yyrestart(FILE* new_file)` to reset Flex's internal state and start scanning over the `new_file`.
 ## Backtracking and Control
-TODO
+There are two functions that allow `yylex` to "re-scan" after finding a match: `yyless` and `yyunput`.
+
+### yyless
+The function `void yyless(int n)`, when called after matching, will "trim" the first `n` characters of the match and have these first `n` characters as the new match for the rest of the code from where it was called and, after returning from the code called upon that match, resume scanning from the beginning of the match + `n`.
+
+To illustrate that, let's use this simple, but great example from [codedost](https://codedost.com/flex/flex-programs/flex-program-check-use-yyless-function/). Suppose we have the following `.lex` file as provided by the article:
+
+```c
+%{
+/* Implementation of yyless() */
+#undef yywrap
+#define yywrap() 1
+%}
+
+%%
+
+[a-z]+ {
+	printf("\nLowercase word = ");
+	ECHO;
+	yyless(3);
+	printf("\nThe word after yyless() = ");
+	ECHO;
+}
+
+[a-zA-Z]+ {
+
+	printf("\nMixed letter is = ");	
+	ECHO;
+
+}
+
+%%
+
+main()
+{
+yylex();
+}
+```
+
+We would get the following output given input `codedost`:
+```
+Lowercase word = codedost
+The word after yyless() = cod
+Lowercase word = edost
+The word after yyless() = edo
+Lowercase word = st
+The word after yyless() = st
+```
+
+Thus, the internal state of the scanner would be something like this:
+```
+1st Match:
+codedostEOF
+^^^^^^^^
+match
+
+After yyless(3):
+codedostEOF
+^^^
+match
+
+Scanner pointer after returning:
+codedostEOF
+   ^
+
+2nd Match:
+codedostEOF
+   ^^^^^
+   match
+
+After yyless(3):
+codedostEOF
+   ^^^
+   match
+
+Scanner pointer after returning:
+codedostEOF
+      ^
+
+3rd Match:
+codedostEOF
+      ^^
+      match
+
+After yyless(3):
+codedostEOF
+      ^^
+      match
+
+Scanner pointer after returning
+codedostEOF
+        ^
+```
 ## Text and Match Data
 TODO
 ## Misc
