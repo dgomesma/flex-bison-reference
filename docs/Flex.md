@@ -378,6 +378,51 @@ Hint: These are very useful variables for error reporting. Make sure to use them
 The function `void yyerror(char* msg)` is the function called by the scanner whenever an error is encountered. It is not defined -- you get to define it.
 
 The scanner by itself won't ever call this function (unless you explicitly code it to do so) since everything that is not matched will simply be ignored. Nonetheless, if you use it with Bison, then Bison will call it whenever it encounters a syntax error.
+
+## Appending to the Match
+The function `void yymore(void)` allows one to append the following match to the current match.
+
+For example, you can use it to match a multi-line comment as follows:
+```C
+%{
+#include <stdio.h>
+%}
+
+%%
+
+"/*"          { yymore(); }
+[^*]*\*+[^*/]*  { yymore(); }  /* Match content within the comment, but not the ending "*/" */
+\*/           { printf("Found comment: %s\n", yytext); }
+
+%%
+
+int main() {
+    yylex();
+    return 0;
+}
+```
+
+So, for instance, running the scanner generated from this Flex file on the input 
+```
+/* This is a 
+multiline comment */
+```
+
+Will cause the following to be printed:
+```
+Found comment: /* This is a 
+multiline comment */
+```
+
+(Although, IMO, a state-based solution to handling comments might result in clearer code and logic).
+
+## Terminate
+The function `void yyterminate(void)`, as the name suggests,  terminates the scanning. Although obvious-sounding, here are some important claficiations to be made
+
+- It does not stop program execution, only the input scanning.
+- It is equivalent to returning 0 on a code run upon matching with a pattern, which is what is returned on EOF.
+- It does not alter the internal state of the scanner.
+- Scanning can be returned by calling yylex again.
 ## Text Editors for Flex/Lex files
 - **VSCode** - Has plugins available for these files. I don't use it, so I can't recommend any.
 - **Vim/nvim** - Provide native support and syntax highlighting for flex files. Good choice.
