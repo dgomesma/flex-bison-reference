@@ -309,6 +309,65 @@ Scanner pointer after returning
 codedostEOF
         ^
 ```
+
+## yyunput
+The function `void yyunput(int c, char* ptr)` causes the scanner to insert the character c at `ptr`.
+
+For example, suppose we want to read a sequence of digits and print the digits in groups of at most 3 digits, not including any digits for the following sequence.
+
+For example, if given the digits `123456 7890 123 45`, then we want to print:
+```
+123
+456
+789
+0
+123
+45
+```
+
+Then we can use unput as follows to get this result:
+```C
+%{
+#include <stdio.h>
+%}
+
+%%
+
+[0-9]{4,}  {
+    int len = strlen(yytext);
+    int i;
+    for (i = len - 1; i >= 3; i--) {
+        yyunput(yytext[i], &yytext[i]);
+    }
+    yytext[3] = '\0';  // Truncate the string to the first 3 characters
+    printf("Matched Rule 1: %s\n", yytext);
+    return 1;
+}
+
+[0-9]+     {
+    printf("Matched Rule 2: %s\n", yytext);
+    return 1;
+}
+
+%%
+
+int main() {
+    yylex();
+    return 0;
+}
+```
+
+The output produced would be as follows:
+```
+Matched Rule 1: 123
+Matched Rule 2: 456
+Matched Rule 1: 789
+Matched Rule 2: 0
+Matched Rule 2: 123
+Matched Rule 2: 45
+```
+
+Note that, when matching with the 1st rule which will always match when there is a sequence of 4 or more digits, the `for` loop will return to the input stream every digit but the first 3 digits from the match and keep only the remaining digits as part of the match. 
 ## Text and Match Data
 TODO
 ## Misc
