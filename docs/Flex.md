@@ -506,4 +506,4 @@ To compile a Flex-generated scanner, you compile it like you'd compile any other
 # External Resources
 **Manual**: https://ftp.gnu.org/old-gnu/Manuals/flex-2.5.4/
 
-**Decaf Flex**: https://anoopsarkar.github.io/compilers-class/lex-practice.html (I wrote my first compiler in this course)
+**Decaf Flex**: https://anoopsarkar.github.io/compilers-class/lex-practice.html
