@@ -368,8 +368,13 @@ Matched Rule 2: 45
 ```
 
 Note that, when matching with the 1st rule which will always match when there is a sequence of 4 or more digits, the `for` loop will return to the input stream every digit but the first 3 digits from the match and keep only the remaining digits as part of the match. 
-## Text and Match Data
-TODO
+## Global Variables with Useful Metadata
+Flex also makes available a few variables which hold some metadata regarding the match and the internal state of the scanner:
+- `char* yytext`: A pointer to a null-terminated character array of the match.
+- `int yyleng`: An `int` with the size of the match.
+- `int yylineno`: An `int` with the number line in which the scanner is currently in. You can either manually manage `yylineno` OR use `%option yylineno` for it to be automatically managed by the scanner (incremented for every new line encountered in the input).
+
+Hint: These are very useful variables for error reporting. Make sure to use them if you want to indicate where an error has happened.
 ## Misc
 TODO
 ## Text Editors for Flex/Lex files
