@@ -413,7 +413,6 @@ Hint: These are very useful variables for error reporting. Make sure to use them
 The function `void yyerror(char* msg)` is the function called by the scanner whenever an error is encountered. It is not defined -- you get to define it.
 
 The scanner by itself won't ever call this function (unless you explicitly code it to do so) since everything that is not matched will simply be ignored. Nonetheless, if you use it with Bison, then Bison will call it whenever it encounters a syntax error.
-
 ## Appending to the Match
 The function `void yymore(void)` allows one to append the following match to the current match.
 
@@ -450,6 +449,25 @@ multiline comment */
 ```
 
 (Although, IMO, a state-based solution to handling comments might result in clearer code and logic).
+## Echo
+A convenient macro for printing the match to `stdout`. E.g. the following simple Flex program basically matches with everything and prints everything to stdout:
+
+```c
+%{
+#include <stdio.h>
+%}
+
+%%
+
+.|\n  { ECHO; }
+
+%%
+
+int main() {
+    yylex();
+    return 0;
+}
+```
 ## Terminate
 The function `void yyterminate(void)`, as the name suggests,  terminates the scanning. Although obvious-sounding, here are some important claficiations to be made
 
@@ -457,6 +475,7 @@ The function `void yyterminate(void)`, as the name suggests,  terminates the sca
 - It is equivalent to returning 0 on a code run upon matching with a pattern, which is what is returned on EOF.
 - It does not alter the internal state of the scanner.
 - Scanning can be returned by calling yylex again.
+## Writing and Building with Flex
 ## Text Editors for Flex/Lex files
 - **VSCode** - Has plugins available for these files. I don't use it, so I can't recommend any.
 - **Vim/nvim** - Provide native support and syntax highlighting for flex files. Good choice.
@@ -484,7 +503,7 @@ flex -o out src
 The naming conventions of Flex `src` files include file names with a `.l`, `.lex`, or `.flex` extension (I recommend using `.lex` since it is more easily recognised by text editors while `.flex` might not be), and `out` files usually have the extension `.lex.c`.
 
 To compile a Flex-generated scanner, you compile it like you'd compile any other C/C++ file, but you have to make sure to include the `-lfl` flag to link the Flex library.
-## Resoures
+# External Resources
 **Manual**: https://ftp.gnu.org/old-gnu/Manuals/flex-2.5.4/
 
 **Decaf Flex**: https://anoopsarkar.github.io/compilers-class/lex-practice.html (I wrote my first compiler in this course)
