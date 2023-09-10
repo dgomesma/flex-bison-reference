@@ -211,7 +211,6 @@ if (!yyin || !yyout) {
 yylex();
 fclose(yyin);
 fclose(yyout);
-
 ```
 
 You can also use `void yyrestart(FILE* new_file)` to reset Flex's internal state and start scanning over the `new_file`.
@@ -375,8 +374,10 @@ Flex also makes available a few variables which hold some metadata regarding the
 - `int yylineno`: An `int` with the number line in which the scanner is currently in. You can either manually manage `yylineno` OR use `%option yylineno` for it to be automatically managed by the scanner (incremented for every new line encountered in the input).
 
 Hint: These are very useful variables for error reporting. Make sure to use them if you want to indicate where an error has happened.
-## Misc
-TODO
+## Error-handling
+The function `void yyerror(char* msg)` is the function called by the scanner whenever an error is encountered. It is not defined -- you get to define it.
+
+The scanner by itself won't ever call this function (unless you explicitly code it to do so) since everything that is not matched will simply be ignored. Nonetheless, if you use it with Bison, then Bison will call it whenever it encounters a syntax error.
 ## Text Editors for Flex/Lex files
 - **VSCode** - Has plugins available for these files. I don't use it, so I can't recommend any.
 - **Vim/nvim** - Provide native support and syntax highlighting for flex files. Good choice.
