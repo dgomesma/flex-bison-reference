@@ -164,4 +164,18 @@ For instance, the comparison operator `<` is one such example where associativit
 Bison will raise a syntax error when it encounters such an issue. Note that, by default, Bison will prefer to shift to the right in such scenarios and raise a warning, so having `%noassoc` may be helpful in raising syntax errors.
 
 ## Precedence
-TODO
+Precedence is another factor that helps determine the resolution of a shift-reduce conflict. Suppose you wanna assign the left associativity to `+` and to `*`, so you do the following:
+
+~~~c
+%left '+' '*'
+~~~
+
+Then what will be the result of `1 + 2 * 3`? Will it be 7 or 9? If you guessed 9, then you guessed it correctly. Because both terminals are declared left-associative in the same directive, they will have the same precedence.
+
+Precedence is determined by their order in which their associativity is determined, where the terminals whose associativity have been first declared get a lower precedence than terminals whose associativity have been last declared. Thus, to correct the precedence for these operations to follow standard order of operations in mathematics, we would need the following:
+```C
+%left '+'
+%left '*'
+```
+
+In that manner, when the parser reaches the state `expr + expr ^ * 3`, it will decide to shift to the right rather than reducing `expr + expr`.
