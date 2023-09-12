@@ -128,10 +128,40 @@ The `%left` and `%right` directives specify the associativity of the grammar tok
 %left TOKEN1 TOKEN2 ...
 ```
 
-The same syntax applies for `%right`. To understand how associativity works in Bison, see the section on associativity.
-## Nonassoc
-TODO
-## Associativity
-TODO
+The same syntax applies for `%right`. 
+
+These tokens help resolve shift-reduce conflicts by enforcing a decision to be taken. For instance, if we have
+~~~C
+%left '+'
+~~~
+
+Then if given the expression `1 + 2 + 3` and the CFG described in the Theory Review section, then when the parser reaches the state `expr + expr ^ + 3`, rather than shifting to the right, it will evaluate `expr + expr -> expr`, resulting in `expr ^ + 3`. In other words, this makes it so that the expression is evaluated in that order: `(1 + 2) + 3`.
+
+On the other hand, if we had
+~~~C
+%right '+'
+~~~
+
+Then at `expr + expr + 3`, the parser would shift right, and these following steps would ensue:
+~~~
+expr + expr ^ + 3
+expr + expr + ^ 3 (shift) 
+expr + expr + 3 ^ (shift)
+expr + expr + expr ^ (reduce)
+expr + expr ^ (reduce)
+expr ^ (reduce)
+~~~
+
+Thus, it would make it equivalent to evaluating `1 + (2 + 3)`.
+## Noassoc
+The `%nonassoc` token tells Bison that the terminal has no associativity, causing a syntax error when a decision regarding associativity is required.
+
+For instance, the comparison operator `<` is one such example where associativity probably doesn't make much sense. For instance, if given `2 < 3 < 4`, what should be reduced first? Then, by stating
+~~~
+%noassoc '<'
+~~~
+
+Bison will raise a syntax error when it encounters such an issue. Note that, by default, Bison will prefer to shift to the right in such scenarios and raise a warning, so having `%noassoc` may be helpful in raising syntax errors.
+
 ## Precedence
 TODO
