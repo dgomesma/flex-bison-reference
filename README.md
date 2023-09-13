@@ -1,15 +1,10 @@
 # flex-bison-reference
 In construction reference and tutorial on Flex and Bison for parsing motivated by the [rinha-de-compiler](https://github.com/dgomesma/rinha-de-compiler).
 
+# Disclaimer
+This tutorial is currently incomplete and has not been reviewed. Although, at a high-level, I am confident the information is pointed towards the right directions, some technical details might not be as accurate as it should. Several issues with notes on some of these problems have been created and will be addressed as soon as possible. Please, refer to this tutorial with caution and, if possible, check the correctness of the information with other resources.
+
 # Future Plans
 - Finish explanation for Bison.
 - Include code examples for both Bison and Flex.
 - Review for correctness.
-
-# Currently On Pause
-Since I am also a participant in the [rinha-de-compiler](https://github.com/dgomesma/rinha-de-compiler) and, so far
-I have spent more time studying and writing this tutorial then actually writing the compiler itself, I will pause
-this tutorial for now and will resume it as soon as I deliver something to the rinha.
-
-If someone becomes interested in this tutorial and would like to complete it with material while I am away,
-please do feel free to make a PR to this project and I will take a look at it.
